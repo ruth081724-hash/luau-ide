@@ -1,0 +1,102 @@
+Quiero que me crees una página WEB COMPLETA estilo Visual Studio Code pero enfocada en LUAU/Roblox scripting.
+
+La página debe verse ULTRA moderna, profesional y hermosa visualmente. Quiero un diseño tipo editor real con:
+- sidebar izquierda
+- explorer de archivos
+- pestañas de scripts
+- editor de código
+- syntax highlighting REAL de LUAU
+- números de línea
+- autocompletado visual
+- consola inferior
+- barra superior
+- status bar abajo
+- tema oscuro estilo VS Code + Rayfield
+- animaciones smooth
+- blur/glassmorphism
+- efectos glow/neón elegantes
+- responsive
+- ultra fluido
+
+IMPORTANTE:
+Quiero que mientras escriba código LUAU, a la derecha se vea una PREVIEW VISUAL EN TIEMPO REAL de cómo se vería la UI/script dentro de Roblox.
+
+Ejemplo:
+Si escribo:
+- CreateWindow
+- CreateButton
+- CreateToggle
+- CreateTab
+- CreateSlider
+
+La preview debe generar automáticamente:
+- ventanas
+- botones
+- toggles
+- sliders
+- tabs
+- notifications
+
+visualizados como una UI Roblox moderna.
+
+La preview debe parecer un executor real o una UI tipo:
+- Rayfield
+- Linoria
+- Fluent
+- Kavo
+- Sirius
+
+Quiero que detecte componentes automáticamente desde el código LUAU y renderice una simulación visual bonita.
+
+REQUISITOS TÉCNICOS:
+- usar Next.js
+- usar Tailwind CSS
+- usar TypeScript
+- usar Monaco Editor (como VS Code real)
+- usar Framer Motion
+- usar Lucide Icons
+- usar componentes modernos reutilizables
+- arquitectura limpia
+- código profesional
+- dark mode elegante
+- gradients modernos
+- glass effects
+- hover animations
+- panel resizing
+- tabs dinámicos
+- sistema modular
+
+QUIERO:
+- estructura completa del proyecto
+- todos los archivos creados
+- componentes separados
+- README profesional
+- package.json listo
+- configuración completa
+
+TAMBIÉN:
+Explícame PASO A PASO cómo:
+1. descargar el proyecto
+2. abrir CMD
+3. usar git init
+4. conectar GitHub
+5. crear repositorio
+6. hacer git push
+7. subirlo a GitHub
+8. crear cuenta en Vercel
+9. importar el repo
+10. configurar el deploy
+11. poner variables de entorno
+12. deployar
+13. actualizar la web automáticamente con git push
+
+Explícalo como si nunca hubiera usado GitHub, Git o Vercel.
+
+También crea:
+- vercel.json
+- .gitignore
+- .env.example
+
+Y deja el proyecto completamente listo para deployar en Vercel SIN errores.
+
+Quiero que la web se vea EXTREMADAMENTE premium y futurista.
