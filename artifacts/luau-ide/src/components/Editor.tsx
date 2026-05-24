@@ -68,8 +68,8 @@ export function Editor({ content, onChange, onRun, isMobile, onCursorChange }: E
   }, [monaco]);
 
   const handleEditorDidMount = (editor: any) => {
-    if (onRun) {
-      editor.addCommand(monaco?.KeyMod.CtrlCmd | monaco?.KeyCode.Enter, () => {
+    if (onRun && monaco) {
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
         onRun();
       });
     }
