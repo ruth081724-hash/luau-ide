@@ -1,14 +1,51 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { ParsedUI } from "../hooks/useLuauParser";
 
 interface PreviewPanelProps {
   parsedUI: ParsedUI;
+  isMobile?: boolean;
 }
 
-export function PreviewPanel({ parsedUI }: PreviewPanelProps) {
+export function PreviewPanel({ parsedUI, isMobile }: PreviewPanelProps) {
   const [activeTab, setActiveTab] = useState(0);
+  const [toggleStates, setToggleStates] = useState<Record<string, boolean>>({});
+  
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const isDragging = useRef(false);
+  const dragStart = useRef({ x: 0, y: 0 });
+  
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current || isMobile) return;
+      setPos({
+        x: e.clientX - dragStart.current.x,
+        y: e.clientY - dragStart.current.y,
+      });
+    };
+    
+    const handleMouseUp = () => {
+      isDragging.current = false;
+    };
+    
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isMobile]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (isMobile) return;
+    isDragging.current = true;
+    dragStart.current = {
+      x: e.clientX - pos.x,
+      y: e.clientY - pos.y,
+    };
+  };
 
   if (!parsedUI.window && parsedUI.elements.length === 0) {
     return (
@@ -40,11 +77,13 @@ export function PreviewPanel({ parsedUI }: PreviewPanelProps) {
 
   return (
     <div className="relative flex items-center justify-center h-full w-full bg-black/90 overflow-hidden">
-      {/* Blurred background map effect */}
+      {/* Background map effect */}
       <div 
-        className="absolute inset-0 opacity-20 bg-cover bg-center"
+        className="absolute inset-0 opacity-10"
         style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop')"
+          backgroundImage: "repeating-linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222), repeating-linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222)",
+          backgroundPosition: "0 0, 10px 10px",
+          backgroundSize: "20px 20px"
         }}
       />
       <div className="absolute inset-0 backdrop-blur-sm" />
@@ -53,16 +92,20 @@ export function PreviewPanel({ parsedUI }: PreviewPanelProps) {
       <motion.div 
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="relative z-10 w-[450px] max-h-[80%] flex flex-col glass-panel rounded-xl overflow-hidden border border-white/5 ide-glow shadow-2xl"
+        style={!isMobile ? { transform: `translate(${pos.x}px, ${pos.y}px)` } : {}}
+        className={`relative z-10 max-h-[80%] flex flex-col glass-panel rounded-xl overflow-hidden border border-white/5 ide-glow shadow-2xl ${isMobile ? 'w-full px-4' : 'w-[450px]'}`}
       >
         {/* Title Bar */}
-        <div className="h-10 bg-black/40 flex items-center px-4 border-b border-white/5 backdrop-blur-md">
+        <div 
+          className={`h-10 bg-black/40 flex items-center px-4 border-b border-white/5 backdrop-blur-md ${!isMobile ? 'cursor-move' : ''}`}
+          onMouseDown={handleMouseDown}
+        >
           <div className="flex gap-1.5 mr-4">
             <div className="w-3 h-3 rounded-full bg-red-500/80" />
             <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
             <div className="w-3 h-3 rounded-full bg-green-500/80" />
           </div>
-          <div className="flex-1 text-center text-sm font-medium text-white/90 truncate mr-12">
+          <div className="flex-1 text-center text-sm font-medium text-white/90 truncate mr-12 select-none">
             {parsedUI.window?.name || "Rayfield UI"}
           </div>
         </div>
@@ -98,7 +141,7 @@ export function PreviewPanel({ parsedUI }: PreviewPanelProps) {
               >
                 {el.type === "section" && (
                   <div className="flex items-center gap-4 mt-6 mb-2">
-                    <div className="text-xs font-bold text-white/40 uppercase tracking-widest whitespace-nowrap">
+                    <div className="text-xs font-bold text-white/40 uppercase tracking-widest whitespace-nowrap select-none">
                       {el.name}
                     </div>
                     <div className="h-px w-full bg-white/10" />
@@ -118,14 +161,23 @@ export function PreviewPanel({ parsedUI }: PreviewPanelProps) {
                   </button>
                 )}
 
-                {el.type === "toggle" && (
-                  <div className="w-full bg-white/5 p-3 rounded-lg flex items-center justify-between border border-white/5">
-                    <span className="text-sm font-medium text-white/90">{el.name}</span>
-                    <div className={`w-10 h-5 rounded-full p-1 transition-colors cursor-pointer ${el.props.currentValue ? 'bg-primary' : 'bg-white/20'}`} onClick={() => toast("Toggle changed")}>
-                      <div className={`w-3 h-3 rounded-full bg-white transition-transform ${el.props.currentValue ? 'translate-x-5' : 'translate-x-0'}`} />
+                {el.type === "toggle" && (() => {
+                  const isOn = toggleStates[el.id] ?? el.props.currentValue;
+                  return (
+                    <div className="w-full bg-white/5 p-3 rounded-lg flex items-center justify-between border border-white/5">
+                      <span className="text-sm font-medium text-white/90">{el.name}</span>
+                      <div 
+                        className={`w-10 h-5 rounded-full p-1 transition-colors cursor-pointer ${isOn ? 'bg-primary' : 'bg-white/20'}`} 
+                        onClick={() => {
+                          setToggleStates(prev => ({ ...prev, [el.id]: !isOn }));
+                          toast("Toggle changed");
+                        }}
+                      >
+                        <div className={`w-3 h-3 rounded-full bg-white transition-transform ${isOn ? 'translate-x-5' : 'translate-x-0'}`} />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {el.type === "slider" && (
                   <div className="w-full bg-white/5 p-3 rounded-lg border border-white/5 space-y-3">
@@ -133,12 +185,14 @@ export function PreviewPanel({ parsedUI }: PreviewPanelProps) {
                       <span className="text-sm font-medium text-white/90">{el.name}</span>
                       <span className="text-xs font-mono text-primary bg-primary/10 px-2 py-0.5 rounded">{el.props.currentValue}</span>
                     </div>
-                    <div className="h-2 bg-black/50 rounded-full overflow-hidden relative">
-                      <div 
-                        className="absolute left-0 top-0 bottom-0 bg-primary ide-glow shadow-primary"
-                        style={{ width: `${((el.props.currentValue - el.props.min) / (el.props.max - el.props.min)) * 100}%` }}
-                      />
-                    </div>
+                    <input 
+                      type="range" 
+                      min={el.props.min || 0} 
+                      max={el.props.max || 100} 
+                      defaultValue={el.props.currentValue || 0}
+                      className="w-full"
+                      style={{ accentColor: 'hsl(var(--primary))' }}
+                    />
                   </div>
                 )}
 
@@ -149,7 +203,6 @@ export function PreviewPanel({ parsedUI }: PreviewPanelProps) {
                       type="text" 
                       placeholder={el.props.placeholder}
                       className="w-full bg-black/40 border border-white/10 rounded-md px-3 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-primary/50 transition-colors"
-                      onChange={() => {}}
                     />
                   </div>
                 )}
